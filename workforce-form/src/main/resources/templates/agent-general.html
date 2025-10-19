@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>General Request - Medtronic</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+<header class="header">
+    <div class="header-content">
+        <img th:src="@{/images/medtronic-logo.png}" alt="Medtronic Logo" class="logo">
+        <button type="button" class="report-btn">Gestión de solicitudes y reportes</button>
+    </div>
+</header>
+
+<div class="form-container">
+    <h2>General Request</h2>
+
+    <form action="/submit-general" method="post">
+
+        <!-- Campos heredados -->
+        <label for="scope">Scope*</label>
+        <input type="text" id="scope" name="scope" th:value="${scope}" readonly class="readonly-field">
+
+        <label for="role">Role*</label>
+        <input type="text" id="role" name="role" th:value="${role}" readonly class="readonly-field">
+
+        <label for="submitted_by">Submitted by*</label>
+        <input type="text" id="submitted_by" name="submittedBy" th:value="${submitted_by}" readonly class="readonly-field">
+
+        <hr>
+
+        <!-- Campos específicos del formulario general -->
+        <label for="subject">Subject*</label>
+        <input type="text" id="subject" name="requestType" placeholder="Enter the subject of your request" required>
+
+        <label for="agent_email">Agent email*</label>
+        <input type="email" id="agent_email" name="agentEmail" placeholder="example@medtronic.com" required>
+
+        <label for="description">Request details*</label>
+        <textarea id="description" name="description" rows="4" placeholder="Describe your request in detail..." required></textarea>
+
+        <label for="notes">Additional notes (optional)</label>
+        <textarea id="notes" name="notes" rows="3" placeholder="Add any other context or comments..."></textarea>
+
+        <button type="submit" class="submit-btn">Submit form</button>
+    </form>
+</div>
+
+<!-- Script para traer datos dinámicos desde el formulario principal -->
+<script>
+    const params = new URLSearchParams(window.location.search);
+    document.getElementById("scope").value = params.get("scope") || "";
+    document.getElementById("role").value = params.get("role") || "";
+    document.getElementById("submitted_by").value = params.get("submitted_by") || "";
+</script>
+
+</body>
+</html>

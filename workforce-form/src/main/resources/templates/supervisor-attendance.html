@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Supervisor - Attendance Request</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+<header>
+    <div class="header-content">
+        <img th:src="@{/images/medtronic-logo.png}" alt="Medtronic Logo" class="logo">
+        <button type="button" class="report-btn">Gestión de solicitudes y reportes</button>
+    </div>
+</header>
+
+<div class="form-container">
+    <h2>Attendance Request (Supervisor)</h2>
+
+    <form action="/submit-supervisor-attendance" method="post">
+
+        <!-- Datos base heredados -->
+        <label for="scope">Scope*</label>
+        <input type="text" id="scope" name="scope" class="styled-input readonly-field" readonly>
+
+        <label for="role">Role*</label>
+        <input type="text" id="role" name="role" class="styled-input readonly-field" readonly>
+
+        <label for="submitted_by">Submitted by*</label>
+        <input type="text" id="submitted_by" name="submitted_by" class="styled-input readonly-field" readonly>
+
+        <hr>
+
+        <!-- CAMPOS DEL FORMULARIO -->
+        <label for="request_type">Type of request*</label>
+        <select id="request_type" name="request_type" class="styled-input" required>
+            <option value="">Select request type</option>
+            <option value="Add new time off activity">Add new time off activity</option>
+            <option value="Edit existing activity">Edit existing activity</option>
+            <option value="Remove activity">Remove activity</option>
+        </select>
+
+        <label for="agent_info">Agent information*</label>
+        <input type="text" id="agent_info" name="agent_info" class="styled-input"
+               placeholder="Enter agent full name or email" required>
+
+        <label for="time_off_activity">Time off activity*</label>
+        <input type="text" id="time_off_activity" name="time_off_activity" class="styled-input"
+               placeholder="Planned, Bereavement, Civic Duty, Holiday, etc." required>
+
+        <!-- FECHAS -->
+        <div class="form-row">
+            <div class="form-group">
+                <label for="start_date">Start date*</label>
+                <input type="date" id="start_date" name="start_date" class="styled-input" required>
+            </div>
+
+            <div class="form-group">
+                <label for="end_date">End date*</label>
+                <input type="date" id="end_date" name="end_date" class="styled-input" required>
+            </div>
+        </div>
+
+        <!-- HORAS -->
+        <div class="form-row">
+            <div class="form-group">
+                <label for="start_time">Start time*</label>
+                <input type="time" id="start_time" name="start_time" class="styled-input" required>
+            </div>
+
+            <div class="form-group">
+                <label for="end_time">End time*</label>
+                <input type="time" id="end_time" name="end_time" class="styled-input" required>
+            </div>
+        </div>
+
+        <!-- NOTES -->
+        <label for="notes">Notes</label>
+        <textarea id="notes" name="notes" class="styled-input" rows="4"
+                  placeholder="If you have supporting documents or comments, provide them here..."></textarea>
+
+        <!-- BOTÓN -->
+        <div class="form-actions">
+            <button type="submit" class="submit-btn">Submit form</button>
+        </div>
+    </form>
+</div>
+
+<!-- Script para precargar datos -->
+<script>
+    const params = new URLSearchParams(window.location.search);
+    document.getElementById("scope").value = params.get("scope") || "";
+    document.getElementById("role").value = params.get("role") || "";
+    document.getElementById("submitted_by").value = params.get("submitted_by") || "";
+</script>
+
+</body>
+</html>
+

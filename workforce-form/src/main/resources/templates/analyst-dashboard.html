@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Analyst Dashboard - Requests Received</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        /* === ESTILOS DE TABLA Y FILTROS === */
+        .dashboard-container {
+            width: 90%;
+            margin: 40px auto;
+            background: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #003C82;
+            margin-bottom: 20px;
+        }
+
+        .filter-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .filter-group select, .filter-group input {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+
+        th {
+            background-color: #003C82;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f4f7fb;
+        }
+
+        .actions button {
+            margin: 2px;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .update-btn {
+            background-color: #FFC107;
+        }
+
+        .done-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .reject-btn {
+            background-color: #E53935;
+            color: white;
+        }
+
+        .pdf-btn {
+            background-color: #003C82;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="header-content">
+        <img th:src="@{/images/medtronic-logo.png}" alt="Medtronic Logo" class="logo">
+        <button type="button" class="report-btn" onclick="window.location.href='/'">Formulario</button>
+    </div>
+</header>
+
+<div class="dashboard-container">
+    <h2>Requests received</h2>
+
+    <div class="filter-bar">
+        <div class="filter-group">
+            <input type="text" id="searchInput" placeholder="Search...">
+            <select id="roleFilter">
+                <option value="">All roles</option>
+                <option value="Agent">Agent</option>
+                <option value="Supervisor">Supervisor</option>
+                <option value="Trainer">Trainer</option>
+            </select>
+            <input type="date" id="dateFilter">
+        </div>
+        <button class="pdf-btn" onclick="downloadPDF()">Download PDF</button>
+    </div>
+
+    <table id="requestsTable">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Submitted by</th>
+            <th>Scope</th>
+            <th>Role</th>
+            <th>Type</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="req : ${requests}">
+            <td th:text="${req.id}"></td>
+            <td th:text="${req.submittedBy}"></td>
+            <td th:text="${req.scope}"></td>
+            <td th:text="${req.role}"></td>
+            <td th:text="${req.requestType}"></td>
+            <td th:text="${#temporals.format(req.createdAt, 'yyyy-MM-dd')}"></td>
+            <td th:text="${req.status}"></td>
+            <td class="actions">
+                <form th:action="@{/analyst/update-status}" method="post" style="display:inline;">
+                    <input type="hidden" name="id" th:value="${req.id}">
+                    <select name="status">
+                        <option>Pending</option>
+                        <option>Completed</option>
+                        <option>Rejected</option>
+                    </select>
+                    <button type="submit" class="update-btn">Update</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // Filtrado dinámico por búsqueda y rol
+    const searchInput = document.getElementById("searchInput");
+    const roleFilter = document.getElementById("roleFilter");
+    const dateFilter = document.getElementById("dateFilter");
+    const table = document.getElementById("requestsTable").getElementsByTagName("tbody")[0];
+
+    function filterTable() {
+        const search = searchInput.value.toLowerCase();
+        const role = roleFilter.value.toLowerCase();
+        const date = dateFilter.value;
+
+        for (const row of table.rows) {
+            const cells = row.getElementsByTagName("td");
+            const matchSearch = row.innerText.toLowerCase().includes(search);
+            const matchRole = role === "" || (cells[3].innerText.toLowerCase() === role);
+            const matchDate = date === "" || cells[5].innerText === date;
+            row.style.display = matchSearch && matchRole && matchDate ? "" : "none";
+        }
+    }
+
+    searchInput.addEventListener("input", filterTable);
+    roleFilter.addEventListener("change", filterTable);
+    dateFilter.addEventListener("change", filterTable);
+
+    function downloadPDF() {
+        window.location.href = "/analyst/download-pdf";
+    }
+</script>
+
+</body>
+</html>

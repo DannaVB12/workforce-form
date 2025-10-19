@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Supervisor - Schedule Changes</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        /* === Modal estilo elegante === */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        .modal {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            animation: popIn 0.35s ease-out;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal h3 {
+            color: #003C82;
+            margin-bottom: 10px;
+        }
+
+        .modal p {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .modal button {
+            background-color: #003C82;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .modal button:hover {
+            background-color: #0055b8;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="header-content">
+        <img th:src="@{/images/medtronic-logo.png}" alt="Medtronic Logo" class="logo">
+        <button type="button" class="report-btn">Gestión de solicitudes y reportes</button>
+    </div>
+</header>
+
+<div class="form-container">
+    <h2>Schedule changes (Supervisor)</h2>
+
+    <form id="supervisorForm">
+
+        <!-- === DATOS BASE === -->
+        <label for="scope">Scope*</label>
+        <input type="text" id="scope" name="scope" class="styled-input readonly-field" readonly>
+
+        <label for="role">Role*</label>
+        <input type="text" id="role" name="role" class="styled-input readonly-field" readonly>
+
+        <label for="submitted_by">Submitted by*</label>
+        <input type="text" id="submitted_by" name="submittedBy" class="styled-input readonly-field" readonly>
+
+        <hr>
+
+        <!-- === CAMPOS DEL FORMULARIO === -->
+        <label for="activity_type">Activity supervisor*</label>
+        <select id="activity_type" name="activityType" class="styled-input" required>
+            <option value="">Select</option>
+            <option value="Team meeting">Meeting team</option>
+            <option value="Coaching">Coaching</option>
+            <option value="Training">Training</option>
+            <option value="Feedback">Feedback</option>
+        </select>
+
+        <label>Type of update*</label>
+        <div class="radio-group">
+            <label><input type="radio" name="requestType" value="Add new event" required> Add a new event to agent schedule</label>
+            <label><input type="radio" name="requestType" value="Reschedule event"> Reschedule an event on agent schedule</label>
+            <label><input type="radio" name="requestType" value="Remove event"> Remove event from agent schedule</label>
+        </div>
+
+        <label>Is this a group event?*</label>
+        <div class="radio-group">
+            <label><input type="radio" name="groupEvent" value="No" required> No, schedule agents separately</label>
+            <label><input type="radio" name="groupEvent" value="Yes"> Yes, schedule agents together</label>
+        </div>
+
+        <label for="calendar_event_title">Calendar event title*</label>
+        <input type="text" id="calendar_event_title" name="calendarEventTitle" class="styled-input" required>
+
+        <label for="agent_info">Agent name(s) - List all attendees separated by row*</label>
+        <textarea id="agent_info" name="agentInfo" class="styled-input" rows="3" required></textarea>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="date">Date*</label>
+                <input type="date" id="date" name="date" class="styled-input" required>
+            </div>
+
+            <div class="form-group">
+                <label for="duration">Duration*</label>
+                <select id="duration" name="duration" class="styled-input" required>
+                    <option value="">Select duration</option>
+                    <option value="15 min">15 min</option>
+                    <option value="30 min">30 min</option>
+                    <option value="1:00">1:00</option>
+                    <option value="1:20">1:20</option>
+                    <option value="2:00">2:00</option>
+                </select>
+            </div>
+        </div>
+
+        <label for="notes">Notes</label>
+        <textarea id="notes" name="notes" class="styled-input" rows="3"
+                  placeholder="If you have supporting documents or comments, provide them here..."></textarea>
+
+        <div class="form-actions">
+            <button type="submit" class="submit-btn">Submit form</button>
+        </div>
+    </form>
+</div>
+
+<!-- === MODAL DE CONFIRMACIÓN === -->
+<div class="modal-overlay" id="successModal">
+    <div class="modal">
+        <h3>✅ Request submitted successfully</h3>
+        <p>Your schedule change request has been recorded.</p>
+        <button onclick="closeModal()">OK</button>
+    </div>
+</div>
+
+<!-- Script para datos dinámicos -->
+<script>
+    const params = new URLSearchParams(window.location.search);
+    document.getElementById("scope").value = params.get("scope") || "";
+    document.getElementById("role").value = params.get("role") || "";
+    document.getElementById("submitted_by").value = params.get("submitted_by") || "";
+
+    // Enviar formulario por AJAX para mostrar modal sin recargar
+    document.getElementById("supervisorForm").addEventListener("submit", async function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const response = await fetch("/supervisor/submit-schedule", {
+            method: "POST",
+            body: formData
+        });
+
+        if (response.ok) {
+            document.getElementById("successModal").style.display = "flex";
+            this.reset();
+        } else {
+            alert("There was a problem submitting the request.");
+        }
+    });
+
+    function closeModal() {
+        document.getElementById("successModal").style.display = "none";
+    }
+</script>
+
+</body>
+</html>

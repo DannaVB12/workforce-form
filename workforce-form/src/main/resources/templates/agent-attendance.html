@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Attendance Request - Medtronic</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+<header class="header">
+    <img th:src="@{/images/medtronic-logo.png}" alt="Medtronic Logo" class="logo">
+    <button type="button" class="report-btn">Gestión de solicitudes y reportes</button>
+</header>
+
+<div class="form-container">
+    <h2>Attendance Request</h2>
+
+    <form action="/submit-attendance" method="post">
+        <!-- Datos heredados -->
+        <label for="scope">Scope*</label>
+        <input type="text" id="scope" name="scope" th:value="${scope}" readonly>
+
+        <label for="role">Role*</label>
+        <input type="text" id="role" name="role" th:value="${role}" readonly>
+
+        <label for="submittedBy">Submitted by*</label>
+        <input type="text" id="submittedBy" name="submittedBy" th:value="${submitted_by}" readonly>
+
+        <hr>
+
+        <!-- Campos del formulario de Attendance -->
+        <label for="typeOfRequest">Type of request*</label>
+        <select id="typeOfRequest" name="typeOfRequest" required>
+            <option value="">Select</option>
+            <option value="Vacation">Vacation</option>
+            <option value="Bereavement leave">Bereavement leave</option>
+            <option value="Paid leave">Paid leave</option>
+            <option value="Unpaid leave">Unpaid leave</option>
+            <option value="Other">Other</option>
+        </select>
+
+        <label for="agentEmail">Agent email*</label>
+        <input type="email" id="agentEmail" name="agentEmail" placeholder="example@medtronic.com" required>
+
+        <label>This request will apply to*</label>
+        <div class="radio-group">
+            <label><input type="radio" name="appliesTo" value="Today" required> Today</label>
+            <label><input type="radio" name="appliesTo" value="Tomorrow"> Tomorrow</label>
+            <label><input type="radio" name="appliesTo" value="Beyond tomorrow"> Beyond tomorrow</label>
+        </div>
+
+        <label>Duration*</label>
+        <div class="radio-group">
+            <label><input type="radio" name="durationType" value="Full day" required> Full day</label>
+            <label><input type="radio" name="durationType" value="Partial hours"> Partial hours</label>
+        </div>
+
+        <label for="notes">Notes</label>
+        <textarea id="notes" name="notes" rows="4" placeholder="If you have supporting documents or comments, please provide them here..."></textarea>
+
+        <button type="submit" class="submit-btn">Submit form</button>
+    </form>
+</div>
+
+<script>
+    // Trae el país seleccionado desde la vista principal
+    const params = new URLSearchParams(window.location.search);
+    const scopeValue = params.get('scope');
+    if (scopeValue) document.getElementById('scope').value = scopeValue;
+</script>
+
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>WFM Request Form - Medtronic</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+<header class="header">
+    <div class="header-content">
+        <img th:src="@{/images/medtronic-logo.png}" alt="Medtronic Logo" class="logo">
+        <button type="button" class="report-btn">Gestión de solicitudes y reportes</button>
+    </div>
+</header>
+
+<div class="form-container">
+    <h2>WFM Request Form</h2>
+
+    <form>
+        <!-- SCOPE -->
+        <label for="scope">Scope*</label>
+        <select id="scope" name="scope" required>
+            <option value="">Select</option>
+            <option value="Colombia">Colombia</option>
+            <option value="Argentina">Argentina</option>
+            <option value="Chile">Chile</option>
+            <option value="Mexico">Mexico</option>
+            <option value="Brazil">Brazil</option>
+            <option value="Other">Other</option>
+        </select>
+
+        <!-- ROLE -->
+        <label>Role*</label>
+        <div class="radio-group">
+            <label><input type="radio" name="role" value="Agent" required> Agent</label>
+            <label><input type="radio" name="role" value="Supervisor"> Supervisor</label>
+            <label><input type="radio" name="role" value="Trainer"> Trainer</label>
+        </div>
+
+        <!-- SUBMITTED BY -->
+        <label for="submitted_by">Submitted by*</label>
+        <input type="text" id="submitted_by" name="submitted_by" placeholder="Name of agent submitting request" required>
+
+        <!-- WORK TYPE -->
+        <label>Work type*</label>
+        <div class="radio-group">
+            <label><input type="radio" name="work_type" value="attendance" onchange="goToForm(this.value)"> Attendance</label>
+            <label><input type="radio" name="work_type" value="schedule" onchange="goToForm(this.value)"> Schedule changes</label>
+            <label><input type="radio" name="work_type" value="general" onchange="goToForm(this.value)"> General request</label>
+        </div>
+    </form>
+</div>
+
+<script>
+    function goToForm(value) {
+        const scope = document.getElementById("scope").value;
+        const role = document.querySelector('input[name="role"]:checked')?.value;
+        const submitted_by = document.getElementById("submitted_by").value;
+
+        // Validar que los campos estén completos
+        if (!scope || !role || !submitted_by) {
+            alert("Please complete Scope, Role, and Submitted by fields before continuing.");
+            return;
+        }
+
+        // Construir los parámetros
+        const params = `?scope=${encodeURIComponent(scope)}&role=${encodeURIComponent(role)}&submitted_by=${encodeURIComponent(submitted_by)}`;
+
+        // Determinar ruta base según el rol
+        let basePath = "/agent"; // por defecto
+        if (role === "Supervisor") {
+            basePath = "/supervisor";
+        } else if (role === "Trainer") {
+            basePath = "/trainer";
+        }
+
+        // Redirigir según el tipo de solicitud y el rol
+        if (value === "attendance") {
+            window.location.href = `${basePath}/attendance${params}`;
+        } else if (value === "schedule") {
+            window.location.href = `${basePath}/schedule${params}`;
+        } else if (value === "general") {
+            window.location.href = `${basePath}/general${params}`;
+        }
+    }
+</script>
+
+
+</body>
+</html>

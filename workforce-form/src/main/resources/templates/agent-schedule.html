@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Schedule Change Request - Medtronic</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+<header class="header">
+    <div class="header-content">
+        <img th:src="@{/images/medtronic-logo.png}" alt="Medtronic Logo" class="logo">
+        <button type="button" class="report-btn">Gestión de solicitudes y reportes</button>
+    </div>
+</header>
+
+<div class="form-container">
+    <h2>Schedule Change Request</h2>
+
+    <form action="/submit-schedule" method="post">
+
+        <!-- CAMPOS HEREDADOS -->
+        <label for="scope">Scope*</label>
+        <input type="text" id="scope" name="scope" th:value="${scope}" readonly class="readonly-field">
+
+        <label for="role">Role*</label>
+        <input type="text" id="role" name="role" th:value="${role}" readonly class="readonly-field">
+
+        <label for="submittedBy">Submitted by*</label>
+        <input type="text" id="submitted_by" name="submittedBy" th:value="${submitted_by}" readonly class="readonly-field">
+
+        <hr>
+
+        <!-- ACTIVITY -->
+        <label for="activityAgent">Activity type*</label>
+        <select id="activityAgent" name="activityAgent" required>
+            <option value="">Select</option>
+            <option value="Lunch">Lunch</option>
+            <option value="Break">Break</option>
+            <option value="Coaching">Coaching</option>
+            <option value="Meeting">Meeting</option>
+            <option value="Training">Training</option>
+            <option value="Other">Other</option>
+        </select>
+
+        <!-- AGENT EMAIL -->
+        <label for="agentEmail">Agent email*</label>
+        <input type="email" id="agentEmail" name="agentEmail" placeholder="example@medtronic.com" required>
+
+        <!-- APPLIES TO -->
+        <label>This request will apply to*</label>
+        <div class="radio-group">
+            <label><input type="radio" name="appliesTo" value="Today" required> Today</label>
+            <label><input type="radio" name="appliesTo" value="Tomorrow"> Tomorrow (or Monday, if today is Friday)</label>
+            <label><input type="radio" name="appliesTo" value="Beyond tomorrow"> Beyond tomorrow</label>
+        </div>
+
+        <!-- TIME SELECTION -->
+        <label for="preferredTime">Preferred time*</label>
+        <div class="time-group">
+            <label><input type="radio" name="timeOption" value="Anytime" checked> Anytime</label>
+            <label class="other-time">
+                <input type="radio" name="timeOption" value="Specific"> Other:
+                <input type="time" id="preferredTime" name="preferredTime">
+            </label>
+        </div>
+
+        <!-- DURATION -->
+        <label for="duration">Duration*</label>
+        <select id="duration" name="duration" required>
+            <option value="">Select duration</option>
+            <option value="15 min">15 minutes</option>
+            <option value="30 min">30 minutes</option>
+            <option value="45 min">45 minutes</option>
+            <option value="1 hr">1 hour</option>
+            <option value="More than 1 hr">More than 1 hour</option>
+        </select>
+
+        <!-- NOTES -->
+        <label for="notes">Notes</label>
+        <textarea id="notes" name="notes" rows="4" placeholder="If you have supporting documents or comments, please provide them here..."></textarea>
+
+        <button type="submit" class="submit-btn">Submit form</button>
+    </form>
+</div>
+
+<!-- Script para traer datos dinámicos -->
+<script>
+    const params = new URLSearchParams(window.location.search);
+    document.getElementById("scope").value = params.get("scope") || "";
+    document.getElementById("role").value = params.get("role") || "";
+    document.getElementById("submitted_by").value = params.get("submitted_by") || "";
+</script>
+
+</body>
+</html>
