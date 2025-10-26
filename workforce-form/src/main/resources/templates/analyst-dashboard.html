@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <title>Analyst Dashboard - Requests Received</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+
     <style>
-        /* === ESTILOS DE TABLA Y FILTROS === */
+        /* === CONTENEDOR PRINCIPAL === */
         .dashboard-container {
             width: 90%;
             margin: 40px auto;
@@ -17,27 +18,70 @@
 
         h2 {
             color: #003C82;
-            margin-bottom: 20px;
+            text-align: center;
+            margin-bottom: 25px;
         }
 
+        /* === FILTROS Y BOTONES === */
         .filter-bar {
             display: flex;
+            flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
+            gap: 10px;
         }
 
         .filter-group {
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
         }
 
-        .filter-group select, .filter-group input {
+        .filter-group select,
+        .filter-group input {
             padding: 8px 12px;
             border-radius: 6px;
             border: 1px solid #ccc;
+            font-size: 14px;
         }
 
+        /* === BOTONES DE EXPORTACIÓN === */
+        .export-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .export-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            color: #fff;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .export-btn.pdf {
+            background-color: #003C82; /* Azul corporativo */
+        }
+
+        .export-btn.excel {
+            background-color: #00A884; /* Verde agua */
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        /* === TABLA === */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -58,9 +102,10 @@
             background-color: #f4f7fb;
         }
 
+        /* === BOTONES DE ACCIÓN === */
         .actions button {
             margin: 2px;
-            padding: 5px 10px;
+            padding: 6px 10px;
             border: none;
             border-radius: 6px;
             cursor: pointer;
@@ -81,14 +126,33 @@
             color: white;
         }
 
-        .pdf-btn {
-            background-color: #003C82;
-            color: white;
+        /* === RESPONSIVE === */
+        @media (max-width: 768px) {
+            .filter-bar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .export-buttons {
+                justify-content: flex-start;
+            }
+        }
+
+        .logo {
+            height: 50px;
+        }
+
+        .header-buttons button {
+            margin-left: 10px;
             padding: 8px 15px;
             border: none;
             border-radius: 6px;
             cursor: pointer;
+            font-weight: 600;
+            background-color: white;
+            color: #003C82;
         }
+
     </style>
 </head>
 
@@ -97,9 +161,13 @@
 <header>
     <div class="header-content">
         <img th:src="@{/images/medtronic-logo.png}" alt="Medtronic Logo" class="logo">
-        <button type="button" class="report-btn" onclick="window.location.href='/'">Formulario</button>
+        <div class="header-buttons">
+            <button type="button" class="report-btn" onclick="window.location.href='/'">Formulario</button>
+            <button type="button" class="logout-btn" onclick="window.location.href='/analyst/logout'">Logout</button>
+        </div>
     </div>
 </header>
+
 
 <div class="dashboard-container">
     <h2>Requests received</h2>
@@ -115,7 +183,14 @@
             </select>
             <input type="date" id="dateFilter">
         </div>
-        <button class="pdf-btn" onclick="downloadPDF()">Download PDF</button>
+        <div class="export-buttons">
+            <button class="export-btn pdf" onclick="downloadPDF()">
+                📄 Download PDF
+            </button>
+            <button class="export-btn excel" onclick="downloadExcel()">
+                📊 Download Excel
+            </button>
+        </div>
     </div>
 
     <table id="requestsTable">
@@ -156,8 +231,9 @@
     </table>
 </div>
 
+<!-- 🔹 SCRIPTS AL FINAL -->
 <script>
-    // Filtrado dinámico por búsqueda y rol
+    // Filtrado dinámico por búsqueda, rol y fecha
     const searchInput = document.getElementById("searchInput");
     const roleFilter = document.getElementById("roleFilter");
     const dateFilter = document.getElementById("dateFilter");
@@ -181,8 +257,13 @@
     roleFilter.addEventListener("change", filterTable);
     dateFilter.addEventListener("change", filterTable);
 
+    // Descarga de reportes
     function downloadPDF() {
         window.location.href = "/analyst/download-pdf";
+    }
+
+    function downloadExcel() {
+        window.location.href = "/analyst/download-excel";
     }
 </script>
 

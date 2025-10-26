@@ -2,10 +2,10 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Agent - General Request</title>
+    <title>Trainer - General Request</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <style>
-        /* === MODAL UNIFICADO === */
+        /* === MODAL === */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -72,10 +72,10 @@
 </header>
 
 <div class="form-container">
-    <h2>General Request (Agent)</h2>
+    <h2>General Request (Trainer)</h2>
 
-    <form id="agentGeneralForm" action="/submit-general" method="post">
-        <!-- Campos heredados -->
+    <form id="trainerGeneralForm" action="/submit-trainer-general" method="post">
+    <!-- === CAMPOS BASE === -->
         <label for="scope">Scope*</label>
         <input type="text" id="scope" name="scope" readonly class="readonly-field">
 
@@ -87,12 +87,12 @@
 
         <hr>
 
-        <!-- Campos específicos del formulario general -->
-        <label for="subject">Subject*</label>
-        <input type="text" id="subject" name="requestType" placeholder="Enter the subject of your request" required>
+        <!-- === CAMPOS DEL FORMULARIO === -->
+        <label for="requestType">Subject*</label>
+        <input type="text" id="requestType" name="requestType" placeholder="Enter subject of your request" required>
 
-        <label for="agent_email">Agent email*</label>
-        <input type="email" id="agent_email" name="agentEmail" placeholder="example@medtronic.com" required>
+        <label for="agentEmail">Trainer email*</label>
+        <input type="email" id="agentEmail" name="agentEmail" placeholder="example@medtronic.com" required>
 
         <label for="description">Request details*</label>
         <textarea id="description" name="description" rows="4" placeholder="Describe your request in detail..." required></textarea>
@@ -101,7 +101,7 @@
         <textarea id="notes" name="notes" rows="3" placeholder="Add any other context or comments..."></textarea>
 
         <div class="form-actions">
-            <button type="submit" class="submit-btn">Submit form</button>
+            <button type="submit" class="submit-btn">Submit request</button>
         </div>
     </form>
 </div>
@@ -115,27 +115,20 @@
     </div>
 </div>
 
+<!-- === SCRIPT === -->
 <script>
-    // Rellenar los campos desde la URL (si vienen por parámetros)
+    // Traer parámetros de la URL (scope, role, submitted_by)
     const params = new URLSearchParams(window.location.search);
     document.getElementById("scope").value = params.get("scope") || "";
     document.getElementById("role").value = params.get("role") || "";
     document.getElementById("submitted_by").value = params.get("submitted_by") || "";
 
-    // Cerrar modal
-    function closeModal() {
-        document.getElementById("successModal").style.display = "none";
-    }
-
-    // Envío AJAX sin recargar la página
-    document.getElementById("agentGeneralForm").addEventListener("submit", async function(e) {
+    // Envío AJAX para no recargar la página
+    document.getElementById("trainerGeneralForm").addEventListener("submit", async function(e) {
         e.preventDefault();
-
         const formData = new FormData(this);
-        const response = await fetch(this.action, {
-            method: "POST",
-            body: formData
-        });
+
+        const response = await fetch(this.action, { method: "POST", body: formData });
 
         if (response.ok) {
             document.getElementById("successModal").style.display = "flex";
@@ -144,6 +137,11 @@
             alert("❌ There was a problem submitting your request.");
         }
     });
+
+    // Cerrar modal
+    function closeModal() {
+        document.getElementById("successModal").style.display = "none";
+    }
 </script>
 
 </body>

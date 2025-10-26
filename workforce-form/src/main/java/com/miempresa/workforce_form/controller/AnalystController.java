@@ -1,21 +1,17 @@
 package com.miempresa.workforce_form.controller;
 
-import com.miempresa.workforce_form.model.AgentAttendanceRequest;
-import com.miempresa.workforce_form.model.AgentScheduleRequest;
-import com.miempresa.workforce_form.model.SupervisorAttendanceRequest;
-import com.miempresa.workforce_form.model.SupervisorScheduleRequest;
-import com.miempresa.workforce_form.repository.AgentAttendanceRepository;
-import com.miempresa.workforce_form.repository.AgentScheduleRepository;
-import com.miempresa.workforce_form.repository.SupervisorAttendanceRepository;
-import com.miempresa.workforce_form.repository.SupervisorScheduleRepository;
+import com.miempresa.workforce_form.model.*;
+import com.miempresa.workforce_form.repository.*;
 import com.miempresa.workforce_form.service.ReportService;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Controller
@@ -34,104 +30,197 @@ public class AnalystController {
     @Autowired
     private SupervisorScheduleRepository supervisorScheduleRepo;
 
+    // 🔹 Trainer no maneja Attendance, así que eliminamos esta referencia
+    // @Autowired(required = false)
+    // private TrainerAttendanceRepository trainerAttendanceRepo;
+
+    @Autowired(required = false)
+    private TrainerScheduleRepository trainerScheduleRepo;
+
+    @Autowired(required = false)
+    private TrainerGeneralRepository trainerGeneralRepo;
+
     @Autowired
     private ReportService reportService;
 
-    // === 1️⃣ Mostrar todas las solicitudes ===
+    // 🔐 Clave de acceso al módulo Analyst
+    private static final String ACCESS_KEY = "analyst2025";
+
+    // Tiempo de sesión (en segundos) → 5 minutos
+    private static final int SESSION_TIMEOUT = 300;
+
+    // =====================================================
+    // 🔹 LOGIN
+    // =====================================================
+    @GetMapping("/login")
+    public String showLoginPage(HttpSession session) {
+        Boolean isAnalyst = (Boolean) session.getAttribute("isAnalyst");
+        if (isAnalyst != null && isAnalyst) {
+            return "redirect:/analyst/dashboard";
+        }
+        return "analyst-login";
+    }
+
+    @PostMapping("/login")
+    public String processLogin(@RequestParam String password, HttpSession session, Model model) {
+        if (ACCESS_KEY.equals(password)) {
+            session.setAttribute("isAnalyst", true);
+            session.setMaxInactiveInterval(SESSION_TIMEOUT);
+            return "redirect:/analyst/dashboard";
+        } else {
+            model.addAttribute("error", "Invalid access key");
+            return "analyst-login";
+        }
+    }
+
+    // =====================================================
+    // 🔹 LOGOUT
+    // =====================================================
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/analyst/login";
+    }
+
+    // =====================================================
+    // 🔹 DASHBOARD
+    // =====================================================
     @GetMapping("/dashboard")
-    public String showDashboard(Model model) {
-        List<Map<String, Object>> allRequests = new ArrayList<>();
-
-        // AGENTE - Attendance
-        for (AgentAttendanceRequest r : agentAttendanceRepo.findAll()) {
-            Map<String, Object> row = new HashMap<>();
-            row.put("id", r.getId());
-            row.put("submittedBy", r.getSubmitted_by());
-            row.put("scope", r.getScope());
-            row.put("role", "Agent");
-            row.put("requestType", "Attendance");
-            row.put("createdAt", r.getCreated_at());
-            row.put("status", r.getStatus());
-            allRequests.add(row);
+    public String showDashboard(Model model, HttpSession session) {
+        if (!isAuthorized(session)) {
+            return "redirect:/analyst/login";
         }
 
-        // AGENTE - Schedule
-        for (AgentScheduleRequest r : agentScheduleRepo.findAll()) {
-            Map<String, Object> row = new HashMap<>();
-            row.put("id", r.getId());
-            row.put("submittedBy", r.getSubmitted_by());
-            row.put("scope", r.getScope());
-            row.put("role", "Agent");
-            row.put("requestType", "Schedule Change");
-            row.put("createdAt", r.getCreated_at());
-            row.put("status", r.getStatus());
-            allRequests.add(row);
-        }
+        List<Map<String, Object>> allRequests = collectAllRequests();
 
-        // SUPERVISOR - Attendance
-        for (SupervisorAttendanceRequest r : supervisorAttendanceRepo.findAll()) {
-            Map<String, Object> row = new HashMap<>();
-            row.put("id", r.getId());
-            row.put("submittedBy", r.getSubmitted_by());
-            row.put("scope", r.getScope());
-            row.put("role", "Supervisor");
-            row.put("requestType", "Attendance");
-            row.put("createdAt", r.getCreated_at());
-            row.put("status", r.getStatus());
-            allRequests.add(row);
-        }
-
-        // SUPERVISOR - Schedule
-        for (SupervisorScheduleRequest r : supervisorScheduleRepo.findAll()) {
-            Map<String, Object> row = new HashMap<>();
-            row.put("id", r.getId());
-            row.put("submittedBy", r.getSubmitted_by());
-            row.put("scope", r.getScope());
-            row.put("role", "Supervisor");
-            row.put("requestType", "Schedule Change");
-            row.put("createdAt", r.getCreated_at());
-            row.put("status", r.getStatus());
-            allRequests.add(row);
-        }
-
-        // ORDENAR POR FECHA (más recientes primero)
-        allRequests.sort((a, b) -> ((Date) b.get("createdAt")).compareTo((Date) a.get("createdAt")));
+        // Ordenar por fecha (más recientes primero)
+        allRequests.sort((a, b) -> {
+            Object dateA = a.get("createdAt");
+            Object dateB = b.get("createdAt");
+            if (dateA == null || dateB == null) return 0;
+            if (dateA instanceof LocalDateTime && dateB instanceof LocalDateTime)
+                return ((LocalDateTime) b.get("createdAt")).compareTo((LocalDateTime) a.get("createdAt"));
+            return 0;
+        });
 
         model.addAttribute("requests", allRequests);
         return "analyst-dashboard";
     }
 
-    // === 2️⃣ Actualizar estado ===
+    // =====================================================
+    // 🔹 Actualizar estado
+    // =====================================================
     @PostMapping("/update-status")
-    public String updateStatus(@RequestParam Long id, @RequestParam String status) {
-        // Actualiza en todas las tablas posibles
+    public String updateStatus(@RequestParam Long id, @RequestParam String status, HttpSession session) {
+        if (!isAuthorized(session)) {
+            return "redirect:/analyst/login";
+        }
+
         agentAttendanceRepo.updateStatusById(id, status);
         agentScheduleRepo.updateStatusById(id, status);
         supervisorAttendanceRepo.updateStatusById(id, status);
         supervisorScheduleRepo.updateStatusById(id, status);
 
+        // 🔹 Trainer solo tiene Schedule y General
+        if (trainerScheduleRepo != null) trainerScheduleRepo.updateStatusById(id, status);
+        if (trainerGeneralRepo != null) trainerGeneralRepo.updateStatusById(id, status);
+
         return "redirect:/analyst/dashboard";
     }
 
-    // === 3️⃣ Descargar reporte PDF ===
+    // =====================================================
+    // 🔹 Descargar PDF
+    // =====================================================
     @GetMapping("/download-pdf")
-    public void downloadPdf(HttpServletResponse response) throws IOException {
+    public void downloadPdf(HttpServletResponse response, HttpSession session) throws IOException {
+        if (!isAuthorized(session)) {
+            response.sendRedirect("/analyst/login");
+            return;
+        }
+
         response.setContentType("application/pdf");
         response.setHeader("Content-Disposition", "attachment; filename=requests_report.pdf");
 
-        List<Map<String, Object>> allRequests = new ArrayList<>();
-        // reutilizamos el método de arriba
-        agentAttendanceRepo.findAll().forEach(r -> {
-            Map<String, Object> row = new HashMap<>();
-            row.put("id", r.getId());
-            row.put("submittedBy", r.getSubmitted_by());
-            row.put("scope", r.getScope());
-            row.put("role", "Agent");
-            row.put("requestType", "Attendance");
-            row.put("createdAt", r.getCreated_at());
-            row.put("status", r.getStatus());
-            allRequests.add(row);
-        });
+        List<Map<String, Object>> allRequests = collectAllRequests();
         reportService.generateRequestsReport(allRequests, response.getOutputStream());
+    }
+
+    // =====================================================
+    // 🔹 Descargar Excel
+    // =====================================================
+    @GetMapping("/download-excel")
+    public void downloadExcel(HttpServletResponse response, HttpSession session) throws IOException {
+        if (!isAuthorized(session)) {
+            response.sendRedirect("/analyst/login");
+            return;
+        }
+
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=requests_report.xlsx");
+
+        List<Map<String, Object>> allRequests = collectAllRequests();
+        reportService.generateRequestsExcel(allRequests, response.getOutputStream());
+    }
+
+    // =====================================================
+    // 🔹 Métodos auxiliares
+    // =====================================================
+    private boolean isAuthorized(HttpSession session) {
+        Boolean isAnalyst = (Boolean) session.getAttribute("isAnalyst");
+        return isAnalyst != null && isAnalyst;
+    }
+
+    private Map<String, Object> createRow(Long id, String submittedBy, String scope,
+                                          String role, String type, Object createdAt, String status) {
+        Map<String, Object> row = new HashMap<>();
+        row.put("id", id);
+        row.put("submittedBy", submittedBy);
+        row.put("scope", scope);
+        row.put("role", role);
+        row.put("requestType", type);
+        row.put("createdAt", createdAt);
+        row.put("status", status);
+        return row;
+    }
+
+    private List<Map<String, Object>> collectAllRequests() {
+        List<Map<String, Object>> allRequests = new ArrayList<>();
+
+        // 🟢 AGENT REQUESTS
+        agentAttendanceRepo.findAll().forEach(r ->
+                allRequests.add(createRow(r.getId(), r.getSubmittedBy(), r.getScope(), "Agent",
+                        "Attendance", r.getCreatedAt(), r.getStatus()))
+        );
+
+        agentScheduleRepo.findAll().forEach(r ->
+                allRequests.add(createRow(r.getId(), r.getSubmittedBy(), r.getScope(), "Agent",
+                        "Schedule Change", r.getCreatedAt(), r.getStatus()))
+        );
+
+        // 🟣 SUPERVISOR REQUESTS
+        supervisorAttendanceRepo.findAll().forEach(r ->
+                allRequests.add(createRow(r.getId(), r.getSubmittedBy(), r.getScope(), "Supervisor",
+                        "Attendance", r.getCreatedAt(), r.getStatus()))
+        );
+
+        supervisorScheduleRepo.findAll().forEach(r ->
+                allRequests.add(createRow(r.getId(), r.getSubmittedBy(), r.getScope(), "Supervisor",
+                        "Schedule Change", r.getCreatedAt(), r.getStatus()))
+        );
+
+        // 🔵 TRAINER REQUESTS (sin attendance)
+        if (trainerScheduleRepo != null)
+            trainerScheduleRepo.findAll().forEach(r ->
+                    allRequests.add(createRow(r.getId(), r.getSubmittedBy(), r.getScope(), "Trainer",
+                            "Schedule Change", r.getCreatedAt(), r.getStatus()))
+            );
+
+        if (trainerGeneralRepo != null)
+            trainerGeneralRepo.findAll().forEach(r ->
+                    allRequests.add(createRow(r.getId(), r.getSubmittedBy(), r.getScope(), "Trainer",
+                            "General Request", r.getCreatedAt(), r.getStatus()))
+            );
+
+        return allRequests;
     }
 }

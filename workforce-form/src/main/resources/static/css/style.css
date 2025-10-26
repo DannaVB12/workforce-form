@@ -246,3 +246,32 @@ button.submit-btn:hover {
         font-size: 1.5rem;
     }
 }
+/* === Ajuste para que ambos botones del header tengan efecto hover === */
+.header-buttons button {
+    border: none;
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* Botón Formulario */
+.report-btn {
+    background-color: #F4F6F8;
+    color: #003C82;
+}
+
+.report-btn:hover {
+    background-color: #E2E8F0; /* gris clarito */
+}
+
+/* Botón Logout */
+.logout-btn {
+    background-color: #F4F6F8;
+    color: #003C82;
+}
+
+.logout-btn:hover {
+    background-color: #E2E8F0; /* el mismo gris claro */
+}

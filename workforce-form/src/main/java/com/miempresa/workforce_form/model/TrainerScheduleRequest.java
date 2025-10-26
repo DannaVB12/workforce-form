@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "supervisor_schedule_requests")
-public class SupervisorScheduleRequest {
+@Table(name = "trainer_schedule_requests")
+public class TrainerScheduleRequest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,7 +23,6 @@ public class SupervisorScheduleRequest {
     private String duration;
     private String notes;
     private String status = "Pending";
-
     private LocalDateTime createdAt = LocalDateTime.now();
 
     // === Getters y Setters ===

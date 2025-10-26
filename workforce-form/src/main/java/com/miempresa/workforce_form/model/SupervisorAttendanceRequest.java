@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "supervisor_attendance_request")
+@Table(name = "supervisor_attendance_requests")
 public class SupervisorAttendanceRequest {
 
     @Id
@@ -14,20 +14,14 @@ public class SupervisorAttendanceRequest {
     private String scope;
     private String role;
     private String submittedBy;
-    private String agentEmail;
     private String typeOfRequest;
+    private String agentEmail;
     private String appliesTo;
     private String durationType;
-
-    @Column(columnDefinition = "TEXT")
     private String notes;
+    private String status = "Pending";
 
-    private LocalDateTime createdAt;
-
-    // === Constructor ===
-    public SupervisorAttendanceRequest() {
-        this.createdAt = LocalDateTime.now();
-    }
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     // === Getters y Setters ===
     public Long getId() { return id; }
@@ -41,11 +35,11 @@ public class SupervisorAttendanceRequest {
     public String getSubmittedBy() { return submittedBy; }
     public void setSubmittedBy(String submittedBy) { this.submittedBy = submittedBy; }
 
-    public String getAgentEmail() { return agentEmail; }
-    public void setAgentEmail(String agentEmail) { this.agentEmail = agentEmail; }
-
     public String getTypeOfRequest() { return typeOfRequest; }
     public void setTypeOfRequest(String typeOfRequest) { this.typeOfRequest = typeOfRequest; }
+
+    public String getAgentEmail() { return agentEmail; }
+    public void setAgentEmail(String agentEmail) { this.agentEmail = agentEmail; }
 
     public String getAppliesTo() { return appliesTo; }
     public void setAppliesTo(String appliesTo) { this.appliesTo = appliesTo; }
@@ -55,6 +49,9 @@ public class SupervisorAttendanceRequest {
 
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

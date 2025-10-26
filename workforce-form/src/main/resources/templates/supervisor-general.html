@@ -2,10 +2,10 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Agent - General Request</title>
+    <title>Supervisor - General Request</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <style>
-        /* === MODAL UNIFICADO === */
+        /* === Modal estilo elegante === */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -16,7 +16,7 @@
             display: none;
             justify-content: center;
             align-items: center;
-            z-index: 9999;
+            z-index: 999;
         }
 
         .modal {
@@ -72,9 +72,9 @@
 </header>
 
 <div class="form-container">
-    <h2>General Request (Agent)</h2>
+    <h2>General Request (Supervisor)</h2>
 
-    <form id="agentGeneralForm" action="/submit-general" method="post">
+    <form id="supervisorGeneralForm" action="/supervisor/submit-general" method="post">
         <!-- Campos heredados -->
         <label for="scope">Scope*</label>
         <input type="text" id="scope" name="scope" readonly class="readonly-field">
@@ -116,22 +116,17 @@
 </div>
 
 <script>
-    // Rellenar los campos desde la URL (si vienen por parámetros)
+    // 🔹 Cargar parámetros desde main.html
     const params = new URLSearchParams(window.location.search);
     document.getElementById("scope").value = params.get("scope") || "";
-    document.getElementById("role").value = params.get("role") || "";
+    document.getElementById("role").value = params.get("role") || "Supervisor";
     document.getElementById("submitted_by").value = params.get("submitted_by") || "";
 
-    // Cerrar modal
-    function closeModal() {
-        document.getElementById("successModal").style.display = "none";
-    }
-
-    // Envío AJAX sin recargar la página
-    document.getElementById("agentGeneralForm").addEventListener("submit", async function(e) {
+    // 🔹 Envío AJAX (sin recargar página)
+    document.getElementById("supervisorGeneralForm").addEventListener("submit", async function(e) {
         e.preventDefault();
-
         const formData = new FormData(this);
+
         const response = await fetch(this.action, {
             method: "POST",
             body: formData
@@ -144,6 +139,11 @@
             alert("❌ There was a problem submitting your request.");
         }
     });
+
+    // 🔹 Cerrar modal
+    function closeModal() {
+        document.getElementById("successModal").style.display = "none";
+    }
 </script>
 
 </body>

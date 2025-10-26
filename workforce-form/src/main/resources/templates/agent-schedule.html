@@ -2,32 +2,88 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Schedule Change Request - Medtronic</title>
+    <title>Agent - Schedule Change Request</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        /* === MODAL UNIFICADO === */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .modal {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            animation: popIn 0.35s ease-out;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal h3 {
+            color: #003C82;
+            margin-bottom: 10px;
+        }
+
+        .modal p {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .modal button {
+            background-color: #003C82;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .modal button:hover {
+            background-color: #0055b8;
+        }
+    </style>
 </head>
 
 <body>
 <header class="header">
     <div class="header-content">
         <img th:src="@{/images/medtronic-logo.png}" alt="Medtronic Logo" class="logo">
-        <button type="button" class="report-btn">Gestión de solicitudes y reportes</button>
+        <button type="button" class="report-btn" onclick="window.location.href='/analyst/login'">
+            Gestión de solicitudes y reportes
+        </button>
     </div>
 </header>
 
 <div class="form-container">
-    <h2>Schedule Change Request</h2>
+    <h2>Schedule Change Request (Agent)</h2>
 
-    <form action="/submit-schedule" method="post">
-
+    <form id="agentScheduleForm" action="/submit-schedule" method="post">
         <!-- CAMPOS HEREDADOS -->
         <label for="scope">Scope*</label>
-        <input type="text" id="scope" name="scope" th:value="${scope}" readonly class="readonly-field">
+        <input type="text" id="scope" name="scope" readonly class="readonly-field">
 
         <label for="role">Role*</label>
-        <input type="text" id="role" name="role" th:value="${role}" readonly class="readonly-field">
+        <input type="text" id="role" name="role" readonly class="readonly-field">
 
-        <label for="submittedBy">Submitted by*</label>
-        <input type="text" id="submitted_by" name="submittedBy" th:value="${submitted_by}" readonly class="readonly-field">
+        <label for="submitted_by">Submitted by*</label>
+        <input type="text" id="submitted_by" name="submittedBy" readonly class="readonly-field">
 
         <hr>
 
@@ -78,18 +134,54 @@
 
         <!-- NOTES -->
         <label for="notes">Notes</label>
-        <textarea id="notes" name="notes" rows="4" placeholder="If you have supporting documents or comments, please provide them here..."></textarea>
+        <textarea id="notes" name="notes" rows="4"
+                  placeholder="If you have supporting documents or comments, please provide them here..."></textarea>
 
-        <button type="submit" class="submit-btn">Submit form</button>
+        <div class="form-actions">
+            <button type="submit" class="submit-btn">Submit form</button>
+        </div>
     </form>
 </div>
 
-<!-- Script para traer datos dinámicos -->
+<!-- === MODAL DE CONFIRMACIÓN === -->
+<div class="modal-overlay" id="successModal">
+    <div class="modal">
+        <h3>✅ Request submitted successfully</h3>
+        <p>Your schedule change request has been recorded successfully.</p>
+        <button onclick="closeModal()">OK</button>
+    </div>
+</div>
+
+<!-- === SCRIPT === -->
 <script>
+    // Traer los valores dinámicos desde la vista principal
     const params = new URLSearchParams(window.location.search);
     document.getElementById("scope").value = params.get("scope") || "";
     document.getElementById("role").value = params.get("role") || "";
     document.getElementById("submitted_by").value = params.get("submitted_by") || "";
+
+    // Cerrar modal
+    function closeModal() {
+        document.getElementById("successModal").style.display = "none";
+    }
+
+    // Enviar formulario por AJAX sin recargar
+    document.getElementById("agentScheduleForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const response = await fetch(this.action, {
+            method: "POST",
+            body: formData
+        });
+
+        if (response.ok) {
+            document.getElementById("successModal").style.display = "flex";
+            this.reset();
+        } else {
+            alert("❌ There was a problem submitting your request.");
+        }
+    });
 </script>
 
 </body>

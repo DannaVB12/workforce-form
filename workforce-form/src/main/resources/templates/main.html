@@ -10,7 +10,9 @@
 <header class="header">
     <div class="header-content">
         <img th:src="@{/images/medtronic-logo.png}" alt="Medtronic Logo" class="logo">
-        <button type="button" class="report-btn">Gestión de solicitudes y reportes</button>
+        <button type="button" class="report-btn" onclick="window.location.href='/analyst/dashboard'">
+            Gestión de solicitudes y reportes
+        </button>
     </div>
 </header>
 
@@ -52,40 +54,183 @@
     </form>
 </div>
 
+<!-- === MODAL ELEGANTE PARA TRAINER === -->
+<div class="modal-overlay" id="trainerWarningModal">
+    <div class="modal">
+        <h3>🧑‍🏫 Hello Trainer!</h3>
+        <p>You can only submit <strong>Schedule</strong> or <strong>General</strong> requests.</p>
+        <button onclick="closeWarningModal()">Got it!</button>
+    </div>
+</div>
+
 <script>
     function goToForm(value) {
         const scope = document.getElementById("scope").value;
         const role = document.querySelector('input[name="role"]:checked')?.value;
         const submitted_by = document.getElementById("submitted_by").value;
 
-        // Validar que los campos estén completos
+        // 🌐 Función para mostrar alertas elegantes
+        function showModalAlert(title, message, icon = "⚠️") {
+            const overlay = document.createElement("div");
+            overlay.style.position = "fixed";
+            overlay.style.top = 0;
+            overlay.style.left = 0;
+            overlay.style.width = "100%";
+            overlay.style.height = "100%";
+            overlay.style.background = "rgba(0,0,0,0.5)";
+            overlay.style.display = "flex";
+            overlay.style.justifyContent = "center";
+            overlay.style.alignItems = "center";
+            overlay.style.zIndex = "9999";
+
+            const box = document.createElement("div");
+            box.style.background = "white";
+            box.style.borderRadius = "15px";
+            box.style.padding = "30px";
+            box.style.width = "90%";
+            box.style.maxWidth = "420px";
+            box.style.textAlign = "center";
+            box.style.boxShadow = "0 8px 25px rgba(0,0,0,0.3)";
+            box.style.animation = "popIn 0.3s ease-out";
+
+            const iconEl = document.createElement("div");
+            iconEl.textContent = icon;
+            iconEl.style.fontSize = "40px";
+            iconEl.style.marginBottom = "10px";
+            box.appendChild(iconEl);
+
+            const titleEl = document.createElement("h3");
+            titleEl.textContent = title;
+            titleEl.style.color = "#003C82";
+            titleEl.style.marginBottom = "10px";
+            box.appendChild(titleEl);
+
+            const messageEl = document.createElement("p");
+            messageEl.textContent = message;
+            messageEl.style.color = "#333";
+            messageEl.style.marginBottom = "20px";
+            messageEl.style.fontSize = "15px";
+            box.appendChild(messageEl);
+
+            const btn = document.createElement("button");
+            btn.textContent = "Got it!";
+            btn.style.background = "#003C82";
+            btn.style.color = "white";
+            btn.style.border = "none";
+            btn.style.padding = "10px 20px";
+            btn.style.borderRadius = "6px";
+            btn.style.cursor = "pointer";
+            btn.onclick = () => document.body.removeChild(overlay);
+            box.appendChild(btn);
+
+            overlay.appendChild(box);
+            document.body.appendChild(overlay);
+        }
+
+        // 🟡 Validar campos obligatorios
         if (!scope || !role || !submitted_by) {
-            alert("Please complete Scope, Role, and Submitted by fields before continuing.");
+            showModalAlert("⚠️ Missing information",
+                "Please complete Scope, Role, and Submitted by fields before continuing.");
             return;
         }
 
-        // Construir los parámetros
-        const params = `?scope=${encodeURIComponent(scope)}&role=${encodeURIComponent(role)}&submitted_by=${encodeURIComponent(submitted_by)}`;
-
-        // Determinar ruta base según el rol
-        let basePath = "/agent"; // por defecto
-        if (role === "Supervisor") {
-            basePath = "/supervisor";
-        } else if (role === "Trainer") {
-            basePath = "/trainer";
+        // 🧑‍🏫 Caso especial: Trainer selecciona Attendance
+        if (role === "Trainer" && value === "attendance") {
+            showModalAlert("🧑‍🏫 Hello Trainer!",
+                "You can only submit Schedule or General requests.", "🧑‍🏫");
+            return;
         }
 
-        // Redirigir según el tipo de solicitud y el rol
-        if (value === "attendance") {
-            window.location.href = `${basePath}/attendance${params}`;
-        } else if (value === "schedule") {
-            window.location.href = `${basePath}/schedule${params}`;
-        } else if (value === "general") {
-            window.location.href = `${basePath}/general${params}`;
+        // Construir parámetros
+        const params = `?scope=${encodeURIComponent(scope)}&role=${encodeURIComponent(role)}&submitted_by=${encodeURIComponent(submitted_by)}`;
+
+        // Redirigir según rol y tipo de solicitud
+        if (role === "Agent") {
+            if (value === "attendance") {
+                window.location.href = `/agent-attendance${params}`;
+            } else if (value === "schedule") {
+                window.location.href = `/agent-schedule${params}`;
+            } else if (value === "general") {
+                window.location.href = `/agent-general${params}`;
+            }
+        }
+        else if (role === "Supervisor") {
+            if (value === "attendance") {
+                window.location.href = `/supervisor-attendance${params}`;
+            } else if (value === "schedule") {
+                window.location.href = `/supervisor/schedule-form${params}`;
+            } else if (value === "general") {
+                window.location.href = `/supervisor/general${params}`;
+            }
+        }
+        else if (role === "Trainer") {
+            if (value === "schedule") {
+                window.location.href = `/trainer-schedule${params}`;
+            } else if (value === "general") {
+                window.location.href = `/trainer-general${params}`;
+            }
         }
     }
 </script>
 
+
+<style>
+    /* === Modal elegante === */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+
+    .modal {
+        background: #fff;
+        padding: 25px 30px;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        width: 90%;
+        max-width: 400px;
+        animation: popIn 0.35s ease-out;
+    }
+
+    @keyframes popIn {
+        from { transform: scale(0.8); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal h3 {
+        color: #003C82;
+        margin-bottom: 10px;
+    }
+
+    .modal p {
+        color: #333;
+        margin-bottom: 20px;
+        font-size: 15px;
+    }
+
+    .modal button {
+        background-color: #003C82;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+
+    .modal button:hover {
+        background-color: #0055b8;
+    }
+</style>
 
 </body>
 </html>

@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "general_requests")
-public class GeneralRequest {
+@Table(name = "agent_attendance_requests")
+public class AgentAttendanceRequest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -14,15 +14,16 @@ public class GeneralRequest {
     private String scope;
     private String role;
     private String submittedBy;
+    private String typeOfRequest;
     private String agentEmail;
-    private String requestType;
-    private String description;
+    private String appliesTo;
+    private String durationType;
     private String notes;
 
-    private String status = "Pending"; // 👈 Agregado
-    private LocalDateTime createdAt = LocalDateTime.now(); // 👈 Valor por defecto
+    private String status = "Pending"; // 👈 nuevo
+    private LocalDateTime createdAt = LocalDateTime.now(); // 👈 nuevo
 
-    // === Getters y Setters ===
+    // Getters y Setters
     public Long getId() { return id; }
 
     public String getScope() { return scope; }
@@ -34,20 +35,23 @@ public class GeneralRequest {
     public String getSubmittedBy() { return submittedBy; }
     public void setSubmittedBy(String submittedBy) { this.submittedBy = submittedBy; }
 
+    public String getTypeOfRequest() { return typeOfRequest; }
+    public void setTypeOfRequest(String typeOfRequest) { this.typeOfRequest = typeOfRequest; }
+
     public String getAgentEmail() { return agentEmail; }
     public void setAgentEmail(String agentEmail) { this.agentEmail = agentEmail; }
 
-    public String getRequestType() { return requestType; }
-    public void setRequestType(String requestType) { this.requestType = requestType; }
+    public String getAppliesTo() { return appliesTo; }
+    public void setAppliesTo(String appliesTo) { this.appliesTo = appliesTo; }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public String getDurationType() { return durationType; }
+    public void setDurationType(String durationType) { this.durationType = durationType; }
 
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
 
-    public String getStatus() { return status; }  // 👈 Nuevo getter
-    public void setStatus(String status) { this.status = status; }  // 👈 Nuevo setter
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

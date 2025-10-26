@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "supervisor_schedule_requests")
-public class SupervisorScheduleRequest {
+@Table(name = "agent_schedule_requests")
+public class AgentScheduleRequest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -14,17 +14,16 @@ public class SupervisorScheduleRequest {
     private String scope;
     private String role;
     private String submittedBy;
-    private String activityType;
-    private String requestType;
-    private String groupEvent;
-    private String calendarEventTitle;
-    private String agentInfo;
-    private String date;
+    private String activityAgent;
+    private String agentEmail;
+    private String appliesTo;
+    private String timeOption;
+    private String preferredTime;
     private String duration;
     private String notes;
-    private String status = "Pending";
 
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private String status = "Pending"; // 👈 nuevo campo
+    private LocalDateTime createdAt = LocalDateTime.now(); // 👈 nuevo campo
 
     // === Getters y Setters ===
     public Long getId() { return id; }
@@ -38,23 +37,20 @@ public class SupervisorScheduleRequest {
     public String getSubmittedBy() { return submittedBy; }
     public void setSubmittedBy(String submittedBy) { this.submittedBy = submittedBy; }
 
-    public String getActivityType() { return activityType; }
-    public void setActivityType(String activityType) { this.activityType = activityType; }
+    public String getActivityAgent() { return activityAgent; }
+    public void setActivityAgent(String activityAgent) { this.activityAgent = activityAgent; }
 
-    public String getRequestType() { return requestType; }
-    public void setRequestType(String requestType) { this.requestType = requestType; }
+    public String getAgentEmail() { return agentEmail; }
+    public void setAgentEmail(String agentEmail) { this.agentEmail = agentEmail; }
 
-    public String getGroupEvent() { return groupEvent; }
-    public void setGroupEvent(String groupEvent) { this.groupEvent = groupEvent; }
+    public String getAppliesTo() { return appliesTo; }
+    public void setAppliesTo(String appliesTo) { this.appliesTo = appliesTo; }
 
-    public String getCalendarEventTitle() { return calendarEventTitle; }
-    public void setCalendarEventTitle(String calendarEventTitle) { this.calendarEventTitle = calendarEventTitle; }
+    public String getTimeOption() { return timeOption; }
+    public void setTimeOption(String timeOption) { this.timeOption = timeOption; }
 
-    public String getAgentInfo() { return agentInfo; }
-    public void setAgentInfo(String agentInfo) { this.agentInfo = agentInfo; }
-
-    public String getDate() { return date; }
-    public void setDate(String date) { this.date = date; }
+    public String getPreferredTime() { return preferredTime; }
+    public void setPreferredTime(String preferredTime) { this.preferredTime = preferredTime; }
 
     public String getDuration() { return duration; }
     public void setDuration(String duration) { this.duration = duration; }

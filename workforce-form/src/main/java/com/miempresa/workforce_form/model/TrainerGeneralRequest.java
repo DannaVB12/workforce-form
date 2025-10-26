@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "supervisor_schedule_requests")
-public class SupervisorScheduleRequest {
+@Table(name = "trainer_general_requests")
+public class TrainerGeneralRequest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -14,16 +14,11 @@ public class SupervisorScheduleRequest {
     private String scope;
     private String role;
     private String submittedBy;
-    private String activityType;
+    private String agentEmail;
     private String requestType;
-    private String groupEvent;
-    private String calendarEventTitle;
-    private String agentInfo;
-    private String date;
-    private String duration;
+    private String description;
     private String notes;
     private String status = "Pending";
-
     private LocalDateTime createdAt = LocalDateTime.now();
 
     // === Getters y Setters ===
@@ -38,26 +33,14 @@ public class SupervisorScheduleRequest {
     public String getSubmittedBy() { return submittedBy; }
     public void setSubmittedBy(String submittedBy) { this.submittedBy = submittedBy; }
 
-    public String getActivityType() { return activityType; }
-    public void setActivityType(String activityType) { this.activityType = activityType; }
+    public String getAgentEmail() { return agentEmail; }
+    public void setAgentEmail(String agentEmail) { this.agentEmail = agentEmail; }
 
     public String getRequestType() { return requestType; }
     public void setRequestType(String requestType) { this.requestType = requestType; }
 
-    public String getGroupEvent() { return groupEvent; }
-    public void setGroupEvent(String groupEvent) { this.groupEvent = groupEvent; }
-
-    public String getCalendarEventTitle() { return calendarEventTitle; }
-    public void setCalendarEventTitle(String calendarEventTitle) { this.calendarEventTitle = calendarEventTitle; }
-
-    public String getAgentInfo() { return agentInfo; }
-    public void setAgentInfo(String agentInfo) { this.agentInfo = agentInfo; }
-
-    public String getDate() { return date; }
-    public void setDate(String date) { this.date = date; }
-
-    public String getDuration() { return duration; }
-    public void setDuration(String duration) { this.duration = duration; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }

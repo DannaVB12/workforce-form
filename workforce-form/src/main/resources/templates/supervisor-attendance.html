@@ -4,6 +4,61 @@
     <meta charset="UTF-8">
     <title>Supervisor - Attendance Request</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+
+    <style>
+        /* === MODAL (centrado y con fondo oscuro) === */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .modal {
+            background: white;
+            padding: 25px 30px;
+            border-radius: 12px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal h3 {
+            margin-bottom: 10px;
+            color: #003C82;
+        }
+
+        .modal p {
+            margin-bottom: 15px;
+        }
+
+        .modal button {
+            background-color: #003C82;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .modal button:hover {
+            background-color: #0055c9;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
 </head>
 
 <body>
@@ -18,7 +73,8 @@
 <div class="form-container">
     <h2>Attendance Request (Supervisor)</h2>
 
-    <form action="/submit-supervisor-attendance" method="post">
+    <!-- 🔹 Agregamos id al formulario -->
+    <form id="supervisorAttendanceForm" action="/submit-supervisor-attendance" method="post">
 
         <!-- Datos base heredados -->
         <label for="scope">Scope*</label>
@@ -87,14 +143,45 @@
     </form>
 </div>
 
-<!-- Script para precargar datos -->
+<!-- === MODAL DE CONFIRMACIÓN === -->
+<div class="modal-overlay" id="successModal">
+    <div class="modal">
+        <h3>✅ Request submitted successfully</h3>
+        <p>Your attendance request has been recorded successfully.</p>
+        <button onclick="closeModal()">OK</button>
+    </div>
+</div>
+
 <script>
+    // Precargar datos dinámicos
     const params = new URLSearchParams(window.location.search);
     document.getElementById("scope").value = params.get("scope") || "";
     document.getElementById("role").value = params.get("role") || "";
     document.getElementById("submitted_by").value = params.get("submitted_by") || "";
+
+    // Cerrar modal
+    function closeModal() {
+        document.getElementById("successModal").style.display = "none";
+    }
+
+    // Envío AJAX sin recargar la página
+    document.getElementById("supervisorAttendanceForm").addEventListener("submit", async function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const response = await fetch(this.action, {
+            method: "POST",
+            body: formData
+        });
+
+        if (response.ok) {
+            document.getElementById("successModal").style.display = "flex";
+            this.reset();
+        } else {
+            alert("❌ There was a problem submitting your request.");
+        }
+    });
 </script>
 
 </body>
 </html>
-

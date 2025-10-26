@@ -3,10 +3,13 @@ package com.miempresa.workforce_form.controller;
 import com.miempresa.workforce_form.model.SupervisorScheduleRequest;
 import com.miempresa.workforce_form.repository.SupervisorScheduleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/supervisor")
@@ -15,18 +18,24 @@ public class SupervisorScheduleController {
     @Autowired
     private SupervisorScheduleRepository repository;
 
-    @PostMapping("/submit-schedule")
-    public String submitSupervisorSchedule(SupervisorScheduleRequest request,
-                                           RedirectAttributes redirectAttributes) {
+    @GetMapping("/schedule-form")
+    public String showScheduleForm() {
+        return "supervisor-schedule";
+    }
 
-        // Guardar en la base de datos
+    @PostMapping("/submit-schedule-form")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> submitSupervisorSchedule(
+            @ModelAttribute SupervisorScheduleRequest request) {
+
+        request.setCreatedAt(LocalDateTime.now());
+        request.setStatus("Pending");
         repository.save(request);
 
-        // Mensaje de confirmación visual
-        redirectAttributes.addFlashAttribute("message",
-                "✅ Schedule change request submitted successfully!");
+        Map<String, Object> response = new HashMap<>();
+        response.put("ok", true);
+        response.put("message", "Schedule change request submitted successfully!");
 
-        // Redirigir de nuevo al formulario
-        return "redirect:/supervisor/schedule";
+        return ResponseEntity.ok(response);
     }
 }

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Analyst Access - Workforce Module</title>
+    <link rel="icon" th:href="@{/images/medtronic-logo.png}">
+    <style>
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: linear-gradient(180deg, #C9DDF4 0%, #F4F7FB 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+
+        .login-container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .login-container img {
+            width: 120px;
+            margin-bottom: 15px;
+        }
+
+        h2 {
+            color: #003C82;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+
+        input[type="password"] {
+            width: 95%;
+            padding: 12px;
+            margin-top: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #ccd1d9;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #003C82;
+            color: white;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        button:hover {
+            background-color: #0050B8;
+        }
+
+        .error {
+            color: #E53935;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .footer {
+            font-size: 13px;
+            color: #6b6b6b;
+            margin-top: 25px;
+        }
+
+        .footer a {
+            color: #003C82;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+<div class="login-container">
+    <img th:src="@{/images/medtronic-logo.png}" alt="Medtronic Logo">
+    <h2>Analyst Access</h2>
+
+    <form th:action="@{/analyst/login}" method="post">
+        <div th:if="${error}" class="error" th:text="${error}"></div>
+        <input type="password" name="password" placeholder="Enter access key" required>
+        <button type="submit">Enter Dashboard</button>
+    </form>
+
+    <div class="footer">
+        <p><a th:href="@{/}">← Back to main form</a></p>
+        <p>Workforce Module © 2025</p>
+    </div>
+</div>
+</body>
+</html>

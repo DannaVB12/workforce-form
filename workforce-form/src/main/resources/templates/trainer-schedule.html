@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Trainer - Schedule Changes</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        /* === Modal elegante === */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        .modal {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            animation: popIn 0.35s ease-out;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal h3 {
+            color: #003C82;
+            margin-bottom: 10px;
+        }
+
+        .modal p {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .modal button {
+            background-color: #003C82;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .modal button:hover {
+            background-color: #0055b8;
+        }
+    </style>
+</head>
+
+<body>
+<header class="header">
+    <div class="header-content">
+        <img th:src="@{/images/medtronic-logo.png}" alt="Medtronic Logo" class="logo">
+        <button type="button" class="report-btn" onclick="window.location.href='/analyst/login'">
+            Gestión de solicitudes y reportes
+        </button>
+    </div>
+</header>
+
+<div class="form-container">
+    <h2>Schedule Changes (Trainer)</h2>
+
+    <form id="trainerForm">
+        <!-- === Datos base === -->
+        <label for="scope">Scope*</label>
+        <input type="text" id="scope" name="scope" class="styled-input readonly-field" readonly>
+
+        <label for="role">Role*</label>
+        <input type="text" id="role" name="role" class="styled-input readonly-field" readonly>
+
+        <label for="submitted_by">Submitted by*</label>
+        <input type="text" id="submitted_by" name="submittedBy" class="styled-input readonly-field" readonly>
+
+        <hr>
+
+        <!-- === Campos del formulario === -->
+        <label for="activity_type">Activity trainer*</label>
+        <select id="activity_type" name="activityType" class="styled-input" required>
+            <option value="">Select</option>
+            <option value="Onboarding">Onboarding</option>
+            <option value="Training Session">Training Session</option>
+            <option value="Follow-up">Follow-up</option>
+            <option value="Shadowing">Shadowing</option>
+        </select>
+
+        <label>Type of update*</label>
+        <div class="radio-group">
+            <label><input type="radio" name="requestType" value="Add new event" required> Add a new training event</label>
+            <label><input type="radio" name="requestType" value="Reschedule event"> Reschedule an existing event</label>
+            <label><input type="radio" name="requestType" value="Remove event"> Remove event from schedule</label>
+        </div>
+
+        <label>Is this a group session?*</label>
+        <div class="radio-group">
+            <label><input type="radio" name="groupEvent" value="No" required> No, schedule trainees separately</label>
+            <label><input type="radio" name="groupEvent" value="Yes"> Yes, schedule trainees together</label>
+        </div>
+
+        <label for="calendar_event_title">Training title*</label>
+        <input type="text" id="calendar_event_title" name="calendarEventTitle" class="styled-input" required>
+
+        <label for="agent_info">Trainee name(s) - List all participants separated by row*</label>
+        <textarea id="agent_info" name="agentInfo" class="styled-input" rows="3" required></textarea>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="date">Date*</label>
+                <input type="date" id="date" name="date" class="styled-input" required>
+            </div>
+
+            <div class="form-group">
+                <label for="duration">Duration*</label>
+                <select id="duration" name="duration" class="styled-input" required>
+                    <option value="">Select duration</option>
+                    <option value="15 min">15 min</option>
+                    <option value="30 min">30 min</option>
+                    <option value="1:00">1:00</option>
+                    <option value="1:30">1:30</option>
+                    <option value="2:00">2:00</option>
+                    <option value="3:00">3:00</option>
+                </select>
+            </div>
+        </div>
+
+        <label for="notes">Notes</label>
+        <textarea id="notes" name="notes" class="styled-input" rows="3"
+                  placeholder="If you have comments or supporting information, add them here..."></textarea>
+
+        <div class="form-actions">
+            <button type="submit" class="submit-btn">Submit form</button>
+        </div>
+    </form>
+</div>
+
+<!-- === Modal de confirmación === -->
+<div class="modal-overlay" id="successModal">
+    <div class="modal">
+        <h3>✅ Request submitted successfully</h3>
+        <p>Your training schedule change has been recorded.</p>
+        <button onclick="closeModal()">OK</button>
+    </div>
+</div>
+
+<!-- === Script === -->
+<script>
+    const params = new URLSearchParams(window.location.search);
+    document.getElementById("scope").value = params.get("scope") || "";
+    document.getElementById("role").value = params.get("role") || "";
+    document.getElementById("submitted_by").value = params.get("submitted_by") || "";
+
+    document.getElementById("trainerForm").addEventListener("submit", async function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const response = await fetch("/submit-trainer-schedule", {
+            method: "POST",
+            body: formData
+        });
+
+        if (response.ok) {
+            document.getElementById("successModal").style.display = "flex";
+            this.reset();
+        } else {
+            alert("There was a problem submitting the request.");
+        }
+    });
+
+    function closeModal() {
+        document.getElementById("successModal").style.display = "none";
+    }
+</script>
+</body>
+</html>

@@ -2,33 +2,82 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Attendance Request - Medtronic</title>
+    <title>Agent - Attendance Request</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        /* === MODAL UNIFICADO === */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .modal {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            animation: popIn 0.35s ease-out;
+        }
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .modal h3 {
+            color: #003C82;
+            margin-bottom: 10px;
+        }
+        .modal p {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .modal button {
+            background-color: #003C82;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .modal button:hover {
+            background-color: #0055b8;
+        }
+    </style>
 </head>
 
 <body>
-<header class="header">
-    <img th:src="@{/images/medtronic-logo.png}" alt="Medtronic Logo" class="logo">
-    <button type="button" class="report-btn">Gestión de solicitudes y reportes</button>
+<header>
+    <div class="header-content">
+        <img th:src="@{/images/medtronic-logo.png}" alt="Medtronic Logo" class="logo">
+        <button type="button" class="report-btn" onclick="window.location.href='/analyst/login'">Gestión de solicitudes y reportes</button>
+    </div>
 </header>
 
 <div class="form-container">
-    <h2>Attendance Request</h2>
+    <h2>Attendance Request (Agent)</h2>
 
-    <form action="/submit-attendance" method="post">
-        <!-- Datos heredados -->
+    <form id="agentAttendanceForm" action="/submit-attendance" method="post">
         <label for="scope">Scope*</label>
-        <input type="text" id="scope" name="scope" th:value="${scope}" readonly>
+        <input type="text" id="scope" name="scope" readonly class="readonly-field">
 
         <label for="role">Role*</label>
-        <input type="text" id="role" name="role" th:value="${role}" readonly>
+        <input type="text" id="role" name="role" readonly class="readonly-field">
 
-        <label for="submittedBy">Submitted by*</label>
-        <input type="text" id="submittedBy" name="submittedBy" th:value="${submitted_by}" readonly>
+        <label for="submitted_by">Submitted by*</label>
+        <input type="text" id="submitted_by" name="submittedBy" readonly class="readonly-field">
 
         <hr>
 
-        <!-- Campos del formulario de Attendance -->
         <label for="typeOfRequest">Type of request*</label>
         <select id="typeOfRequest" name="typeOfRequest" required>
             <option value="">Select</option>
@@ -58,16 +107,44 @@
         <label for="notes">Notes</label>
         <textarea id="notes" name="notes" rows="4" placeholder="If you have supporting documents or comments, please provide them here..."></textarea>
 
-        <button type="submit" class="submit-btn">Submit form</button>
+        <div class="form-actions">
+            <button type="submit" class="submit-btn">Submit form</button>
+        </div>
     </form>
 </div>
 
-<script>
-    // Trae el país seleccionado desde la vista principal
-    const params = new URLSearchParams(window.location.search);
-    const scopeValue = params.get('scope');
-    if (scopeValue) document.getElementById('scope').value = scopeValue;
-</script>
+<!-- === MODAL === -->
+<div class="modal-overlay" id="successModal">
+    <div class="modal">
+        <h3>✅ Request submitted successfully</h3>
+        <p>Your attendance request has been recorded.</p>
+        <button onclick="closeModal()">OK</button>
+    </div>
+</div>
 
+<script>
+    const params = new URLSearchParams(window.location.search);
+    document.getElementById("scope").value = params.get("scope") || "";
+    document.getElementById("role").value = params.get("role") || "";
+    document.getElementById("submitted_by").value = params.get("submitted_by") || "";
+
+    function closeModal() {
+        document.getElementById("successModal").style.display = "none";
+    }
+
+    document.getElementById("agentAttendanceForm").addEventListener("submit", async function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const response = await fetch(this.action, { method: "POST", body: formData });
+
+        if (response.ok) {
+            document.getElementById("successModal").style.display = "flex";
+            this.reset();
+        } else {
+            alert("❌ There was a problem submitting your request.");
+        }
+    });
+</script>
 </body>
 </html>
