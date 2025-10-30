@@ -110,21 +110,60 @@ public class AnalystController {
     }
 
     // =====================================================
-    // 🔹 Actualizar estado
+    // 🔹 Actualizar estado (CORREGIDO)
     // =====================================================
     @PostMapping("/update-status")
-    public String updateStatus(@RequestParam Long id, @RequestParam String status, HttpSession session) {
+    public String updateStatus(
+            @RequestParam Long id,
+            @RequestParam String status,
+            @RequestParam String role,
+            @RequestParam String requestType,
+            HttpSession session) {
+
         if (!isAuthorized(session)) {
             return "redirect:/analyst/login";
         }
 
-        agentAttendanceRepo.updateStatusById(id, status);
-        agentScheduleRepo.updateStatusById(id, status);
-        supervisorAttendanceRepo.updateStatusById(id, status);
-        supervisorScheduleRepo.updateStatusById(id, status);
+        try {
+            System.out.println("🟢 DEBUG => ID: " + id + ", ROLE: " + role + ", TYPE: " + requestType + ", STATUS: " + status);
 
-        if (trainerScheduleRepo != null) trainerScheduleRepo.updateStatusById(id, status);
-        if (trainerGeneralRepo != null) trainerGeneralRepo.updateStatusById(id, status);
+            String normalizedRole = role.trim().toLowerCase();
+            String normalizedType = requestType.trim().toLowerCase();
+
+            // === AGENT ===
+            if (normalizedRole.contains("agent")) {
+                if (normalizedType.contains("attendance")) {
+                    agentAttendanceRepo.updateStatusById(id, status);
+                } else if (normalizedType.contains("schedule")) {
+                    agentScheduleRepo.updateStatusById(id, status);
+                } else if (normalizedType.contains("general")) {
+                    generalRequestRepo.updateStatusById(id, status);
+                }
+            }
+
+            // === SUPERVISOR ===
+            else if (normalizedRole.contains("supervisor")) {
+                if (normalizedType.contains("attendance")) {
+                    supervisorAttendanceRepo.updateStatusById(id, status);
+                } else if (normalizedType.contains("schedule")) {
+                    supervisorScheduleRepo.updateStatusById(id, status);
+                } else if (normalizedType.contains("general")) {
+                    supervisorGeneralRepo.updateStatusById(id, status);
+                }
+            }
+
+            // === TRAINER ===
+            else if (normalizedRole.contains("trainer")) {
+                if (trainerScheduleRepo != null && normalizedType.contains("schedule")) {
+                    trainerScheduleRepo.updateStatusById(id, status);
+                } else if (trainerGeneralRepo != null && normalizedType.contains("general")) {
+                    trainerGeneralRepo.updateStatusById(id, status);
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         return "redirect:/analyst/dashboard";
     }
@@ -198,7 +237,6 @@ public class AnalystController {
                         "Schedule Change", r.getCreatedAt(), r.getStatus()))
         );
 
-        // 🟢 AGENT - GENERAL REQUESTS
         generalRequestRepo.findAll().forEach(r ->
                 allRequests.add(createRow(r.getId(), r.getSubmittedBy(), r.getScope(), "Agent",
                         "General Request", r.getCreatedAt(), r.getStatus()))
@@ -215,7 +253,6 @@ public class AnalystController {
                         "Schedule Change", r.getCreatedAt(), r.getStatus()))
         );
 
-        // 🟣 SUPERVISOR - GENERAL REQUESTS (💡 NUEVO BLOQUE)
         supervisorGeneralRepo.findAll().forEach(r ->
                 allRequests.add(createRow(r.getId(), r.getSubmittedBy(), r.getScope(), "Supervisor",
                         "General Request", r.getCreatedAt(), r.getStatus()))
@@ -237,4 +274,3 @@ public class AnalystController {
         return allRequests;
     }
 }
-

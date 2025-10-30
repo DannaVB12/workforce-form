@@ -66,17 +66,18 @@
 <header>
     <div class="header-content">
         <img th:src="@{/images/medtronic-logo.png}" alt="Medtronic Logo" class="logo">
-        <button type="button" class="report-btn">Gestión de solicitudes y reportes</button>
+        <button type="button" class="report-btn" onclick="window.location.href='/analyst/login'">
+            Gestión de solicitudes y reportes
+        </button>
     </div>
 </header>
 
 <div class="form-container">
     <h2>Attendance Request (Supervisor)</h2>
 
-    <!-- 🔹 Agregamos id al formulario -->
     <form id="supervisorAttendanceForm" action="/submit-supervisor-attendance" method="post">
 
-        <!-- Datos base heredados -->
+        <!-- DATOS BASE -->
         <label for="scope">Scope*</label>
         <input type="text" id="scope" name="scope" class="styled-input readonly-field" readonly>
 
@@ -84,13 +85,13 @@
         <input type="text" id="role" name="role" class="styled-input readonly-field" readonly>
 
         <label for="submitted_by">Submitted by*</label>
-        <input type="text" id="submitted_by" name="submitted_by" class="styled-input readonly-field" readonly>
+        <input type="text" id="submitted_by" name="submittedBy" class="styled-input readonly-field" readonly>
 
         <hr>
 
         <!-- CAMPOS DEL FORMULARIO -->
         <label for="request_type">Type of request*</label>
-        <select id="request_type" name="request_type" class="styled-input" required>
+        <select id="request_type" name="typeOfRequest" class="styled-input" required>
             <option value="">Select request type</option>
             <option value="Add new time off activity">Add new time off activity</option>
             <option value="Edit existing activity">Edit existing activity</option>
@@ -98,23 +99,23 @@
         </select>
 
         <label for="agent_info">Agent information*</label>
-        <input type="text" id="agent_info" name="agent_info" class="styled-input"
+        <input type="text" id="agent_info" name="agentEmail" class="styled-input"
                placeholder="Enter agent full name or email" required>
 
         <label for="time_off_activity">Time off activity*</label>
-        <input type="text" id="time_off_activity" name="time_off_activity" class="styled-input"
+        <input type="text" id="time_off_activity" name="appliesTo" class="styled-input"
                placeholder="Planned, Bereavement, Civic Duty, Holiday, etc." required>
 
         <!-- FECHAS -->
         <div class="form-row">
             <div class="form-group">
                 <label for="start_date">Start date*</label>
-                <input type="date" id="start_date" name="start_date" class="styled-input" required>
+                <input type="date" id="start_date" name="startDate" class="styled-input" required>
             </div>
 
             <div class="form-group">
                 <label for="end_date">End date*</label>
-                <input type="date" id="end_date" name="end_date" class="styled-input" required>
+                <input type="date" id="end_date" name="endDate" class="styled-input" required>
             </div>
         </div>
 
@@ -122,12 +123,12 @@
         <div class="form-row">
             <div class="form-group">
                 <label for="start_time">Start time*</label>
-                <input type="time" id="start_time" name="start_time" class="styled-input" required>
+                <input type="time" id="start_time" name="startTime" class="styled-input" required>
             </div>
 
             <div class="form-group">
                 <label for="end_time">End time*</label>
-                <input type="time" id="end_time" name="end_time" class="styled-input" required>
+                <input type="time" id="end_time" name="endTime" class="styled-input" required>
             </div>
         </div>
 
@@ -153,10 +154,10 @@
 </div>
 
 <script>
-    // Precargar datos dinámicos
+    // Precargar datos dinámicos desde la URL
     const params = new URLSearchParams(window.location.search);
     document.getElementById("scope").value = params.get("scope") || "";
-    document.getElementById("role").value = params.get("role") || "";
+    document.getElementById("role").value = params.get("role") || "Supervisor";
     document.getElementById("submitted_by").value = params.get("submitted_by") || "";
 
     // Cerrar modal

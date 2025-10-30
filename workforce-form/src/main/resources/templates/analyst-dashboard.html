@@ -218,11 +218,15 @@
             <td class="actions">
                 <form th:action="@{/analyst/update-status}" method="post" style="display:inline;">
                     <input type="hidden" name="id" th:value="${req.id}">
+                    <input type="hidden" name="role" th:value="${req.role}">
+                    <input type="hidden" name="requestType" th:value="${req.requestType}">
+
                     <select name="status">
                         <option>Pending</option>
                         <option>Completed</option>
                         <option>Rejected</option>
                     </select>
+
                     <button type="submit" class="update-btn">Update</button>
                 </form>
             </td>
