@@ -18,12 +18,14 @@ public class SupervisorScheduleController {
     @Autowired
     private SupervisorScheduleRepository repository;
 
+    // ✅ Cargar formulario
     @GetMapping("/schedule-form")
     public String showScheduleForm() {
         return "supervisor-schedule";
     }
 
-    @PostMapping("/submit-schedule-form")
+    // ✅ Guardar formulario (ruta corregida)
+    @PostMapping("/submit-schedule")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> submitSupervisorSchedule(
             @ModelAttribute SupervisorScheduleRequest request) {

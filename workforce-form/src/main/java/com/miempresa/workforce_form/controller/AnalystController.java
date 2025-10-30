@@ -19,6 +19,9 @@ import java.util.*;
 public class AnalystController {
 
     @Autowired
+    private GeneralRequestRepository generalRequestRepo;
+
+    @Autowired
     private AgentAttendanceRepository agentAttendanceRepo;
 
     @Autowired
@@ -30,9 +33,8 @@ public class AnalystController {
     @Autowired
     private SupervisorScheduleRepository supervisorScheduleRepo;
 
-    // 🔹 Trainer no maneja Attendance, así que eliminamos esta referencia
-    // @Autowired(required = false)
-    // private TrainerAttendanceRepository trainerAttendanceRepo;
+    @Autowired
+    private SupervisorGeneralRepository supervisorGeneralRepo;
 
     @Autowired(required = false)
     private TrainerScheduleRepository trainerScheduleRepo;
@@ -121,7 +123,6 @@ public class AnalystController {
         supervisorAttendanceRepo.updateStatusById(id, status);
         supervisorScheduleRepo.updateStatusById(id, status);
 
-        // 🔹 Trainer solo tiene Schedule y General
         if (trainerScheduleRepo != null) trainerScheduleRepo.updateStatusById(id, status);
         if (trainerGeneralRepo != null) trainerGeneralRepo.updateStatusById(id, status);
 
@@ -197,6 +198,12 @@ public class AnalystController {
                         "Schedule Change", r.getCreatedAt(), r.getStatus()))
         );
 
+        // 🟢 AGENT - GENERAL REQUESTS
+        generalRequestRepo.findAll().forEach(r ->
+                allRequests.add(createRow(r.getId(), r.getSubmittedBy(), r.getScope(), "Agent",
+                        "General Request", r.getCreatedAt(), r.getStatus()))
+        );
+
         // 🟣 SUPERVISOR REQUESTS
         supervisorAttendanceRepo.findAll().forEach(r ->
                 allRequests.add(createRow(r.getId(), r.getSubmittedBy(), r.getScope(), "Supervisor",
@@ -208,7 +215,13 @@ public class AnalystController {
                         "Schedule Change", r.getCreatedAt(), r.getStatus()))
         );
 
-        // 🔵 TRAINER REQUESTS (sin attendance)
+        // 🟣 SUPERVISOR - GENERAL REQUESTS (💡 NUEVO BLOQUE)
+        supervisorGeneralRepo.findAll().forEach(r ->
+                allRequests.add(createRow(r.getId(), r.getSubmittedBy(), r.getScope(), "Supervisor",
+                        "General Request", r.getCreatedAt(), r.getStatus()))
+        );
+
+        // 🔵 TRAINER REQUESTS
         if (trainerScheduleRepo != null)
             trainerScheduleRepo.findAll().forEach(r ->
                     allRequests.add(createRow(r.getId(), r.getSubmittedBy(), r.getScope(), "Trainer",
@@ -224,3 +237,4 @@ public class AnalystController {
         return allRequests;
     }
 }
+
