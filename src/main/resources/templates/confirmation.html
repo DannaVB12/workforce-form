@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Confirmation - Medtronic</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+<div class="form-container" style="text-align: center;">
+    <h2 th:text="${message}">Your request has been successfully submitted!</h2>
+    <p>Thank you for submitting your request.</p>
+    <a href="/" class="submit-btn">Return to Home</a>
+</div>
+</body>
+</html>

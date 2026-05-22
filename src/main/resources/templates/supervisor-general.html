@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Supervisor - General Request</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        /* === Modal estilo elegante === */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        .modal {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            animation: popIn 0.35s ease-out;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal h3 {
+            color: #003C82;
+            margin-bottom: 10px;
+        }
+
+        .modal p {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .modal button {
+            background-color: #003C82;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .modal button:hover {
+            background-color: #0055b8;
+        }
+    </style>
+</head>
+
+<body>
+<header class="header">
+    <div class="header-content">
+        <img th:src="@{/images/medtronic-logo.png}" alt="Medtronic Logo" class="logo">
+        <button type="button" class="report-btn" onclick="window.location.href='/analyst/login'">
+            Gestión de solicitudes y reportes
+        </button>
+    </div>
+</header>
+
+<div class="form-container">
+    <h2>General Request (Supervisor)</h2>
+
+    <form id="supervisorGeneralForm" action="/supervisor/submit-general" method="post">
+        <!-- Campos heredados -->
+        <label for="scope">Scope*</label>
+        <input type="text" id="scope" name="scope" readonly class="readonly-field">
+
+        <label for="role">Role*</label>
+        <input type="text" id="role" name="role" readonly class="readonly-field">
+
+        <label for="submitted_by">Submitted by*</label>
+        <input type="text" id="submitted_by" name="submittedBy" readonly class="readonly-field">
+
+        <hr>
+
+        <!-- Campos específicos del formulario general -->
+        <label for="subject">Subject*</label>
+        <input type="text" id="subject" name="requestType" placeholder="Enter the subject of your request" required>
+
+        <label for="agent_email">Agent email*</label>
+        <input type="email" id="agent_email" name="agentEmail" placeholder="example@medtronic.com" required>
+
+        <label for="description">Request details*</label>
+        <textarea id="description" name="description" rows="4" placeholder="Describe your request in detail..." required></textarea>
+
+        <label for="notes">Additional notes (optional)</label>
+        <textarea id="notes" name="notes" rows="3" placeholder="Add any other context or comments..."></textarea>
+
+        <div class="form-actions">
+            <button type="submit" class="submit-btn">Submit form</button>
+        </div>
+    </form>
+</div>
+
+<!-- === MODAL DE CONFIRMACIÓN === -->
+<div class="modal-overlay" id="successModal">
+    <div class="modal">
+        <h3>✅ Request submitted successfully</h3>
+        <p>Your general request has been recorded successfully.</p>
+        <button onclick="closeModal()">OK</button>
+    </div>
+</div>
+
+<script>
+    // 🔹 Cargar parámetros desde main.html
+    const params = new URLSearchParams(window.location.search);
+    document.getElementById("scope").value = params.get("scope") || "";
+    document.getElementById("role").value = params.get("role") || "Supervisor";
+    document.getElementById("submitted_by").value = params.get("submitted_by") || "";
+
+    // 🔹 Envío AJAX (sin recargar página)
+    document.getElementById("supervisorGeneralForm").addEventListener("submit", async function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+
+        const response = await fetch(this.action, {
+            method: "POST",
+            body: formData
+        });
+
+        if (response.ok) {
+            document.getElementById("successModal").style.display = "flex";
+            this.reset();
+        } else {
+            alert("❌ There was a problem submitting your request.");
+        }
+    });
+
+    // 🔹 Cerrar modal
+    function closeModal() {
+        document.getElementById("successModal").style.display = "none";
+    }
+</script>
+
+</body>
+</html>
