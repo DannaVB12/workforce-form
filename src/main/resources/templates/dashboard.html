@@ -65,13 +65,13 @@
         }
 
         .card{
-            background:white;
+            background: linear-gradient(135deg, #ffffff, #eef6ff);
             padding:22px;
             border-radius:14px;
-            box-shadow:0 8px 20px rgba(0,0,0,0.08);
+            box-shadow:0 12px 30px rgba(0,0,0,0.08);
             text-align:center;
             border-top:5px solid #b9d6f7;
-            transition:.3s;
+            transition:.4s ease;
         }
 
         .card:hover{
@@ -156,7 +156,9 @@
         }
 
         tr:hover{
-            background:#f1f7ff;
+            background:#eaf4ff;
+            transform:scale(1.002);
+            transition:.2s;
         }
 
         .pending{
@@ -212,32 +214,32 @@
     <div class="kpis">
 
         <div class="card">
-            <h3>Total Requests</h3>
+            <h3>📋 Total Requests</h3>
             <h2 th:text="${totalSolicitudes}">0</h2>
         </div>
 
         <div class="card">
-            <h3>Attendance</h3>
-            <h2 th:text="${datosTipo[0][1]}">0</h2>
+            <h3>🕒 Attendance</h3>
+            <h2 th:text="${attendance}">0</h2>
         </div>
 
         <div class="card">
-            <h3>Schedule Change</h3>
-            <h2 th:text="${datosTipo[1][1]}">0</h2>
+            <h3>📅 Schedule Change</h3>
+            <h2 th:text="${schedule}">0</h2>
         </div>
 
         <div class="card">
-            <h3>General Request</h3>
-            <h2 th:text="${datosTipo[2][1]}">0</h2>
+            <h3>📨 General Request</h3>
+            <h2 th:text="${general}">0</h2>
         </div>
 
         <div class="card">
-            <h3>Pending</h3>
+            <h3>⏳ Pending</h3>
             <h2 id="pendingCount">0</h2>
         </div>
 
         <div class="card">
-            <h3>Completed</h3>
+            <h3>✅ Completed</h3>
             <h2 id="completedCount">0</h2>
         </div>
 
@@ -246,14 +248,108 @@
     <!-- Charts -->
     <div class="charts">
 
+        <!-- REQUESTS BY TYPE -->
+
         <div class="chart-box">
             <h3>Requests by Type</h3>
             <canvas id="barChart"></canvas>
         </div>
 
+        <!-- STATUS -->
+
         <div class="chart-box">
             <h3>Status Distribution</h3>
             <canvas id="pieChart"></canvas>
+        </div>
+
+        <!-- PREDICTIVE SECTION -->
+
+        <div class="chart-box" style="grid-column: span 2;">
+
+            <div style="
+            display:grid;
+            grid-template-columns:2fr 1fr;
+            gap:20px;
+            align-items:stretch;
+        ">
+
+                <!-- LINE CHART -->
+
+                <div>
+                    <h3>Predictive Requests Trend</h3>
+                    <canvas id="predictionChart"></canvas>
+                </div>
+
+                <!-- KPI CARDS -->
+
+                <div style="
+                display:flex;
+                flex-direction:column;
+                gap:20px;
+            ">
+
+                    <!-- WORKLOAD -->
+
+                    <div class="card"
+                         style="
+                        text-align:center;
+                        border-top:6px solid #5fa3d3;
+                        height:100%;
+                ">
+
+                        <h3>🔥 Expected Workload Level</h3>
+
+                        <h1 style="
+                        margin:10px 0;
+                        font-size:42px;
+                        color:#0b3c5d;
+                    "
+                            th:text="${workloadLevel}">
+                            HIGH
+                        </h1>
+
+                        <p style="
+                        color:#64748b;
+                        font-size:15px;
+                    "
+                           th:text="${workloadMessage}">
+                            Increasing request trend detected
+                        </p>
+
+                    </div>
+
+                    <!-- GROWTH -->
+
+                    <div class="card"
+                         style="
+                        text-align:center;
+                        border-top:6px solid #86efac;
+                        height:100%;
+                ">
+
+                        <h3>📈 Predicted Growth</h3>
+
+                        <h1 style="
+                        margin:10px 0;
+                        font-size:42px;
+                        color:#065f46;
+                    ">
+                            +<span th:text="${growthPercentage}">0</span>%
+                        </h1>
+
+                        <p style="
+                        color:#64748b;
+                        font-size:15px;
+                    ">
+                            Expected request increase
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
         </div>
 
     </div>
@@ -338,6 +434,7 @@
         data: {
             labels: labels,
             datasets: [{
+                label: 'Requests',
                 data: values
             }]
         },
@@ -369,12 +466,67 @@
 
     // PIE CHART
     new Chart(document.getElementById('pieChart'), {
+
         type: 'pie',
+
         data: {
+
             labels: ['Pending', 'Completed'],
+
             datasets: [{
                 data: [pending, completed]
             }]
+        },
+
+        options: {
+
+            responsive: true,
+
+            plugins: {
+
+                tooltip: {
+
+                    callbacks: {
+
+                        label: function(context) {
+
+                            let total = pending + completed;
+
+                            let value = context.raw;
+
+                            let percentage =
+                                ((value / total) * 100).toFixed(1);
+
+                            return context.label +
+                                ': ' +
+                                value +
+                                ' (' +
+                                percentage +
+                                '%)';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // ===== PREDICTIVE CHART =====
+
+    let predictionData = /*[[${predictionData}]]*/ [];
+
+    new Chart(document.getElementById('predictionChart'), {
+        type: 'line',
+        data: {
+            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Prediction'],
+            datasets: [{
+                label: 'Predicted Requests',
+                data: predictionData,
+                tension: 0.3,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true
         }
     });
 
